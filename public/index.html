@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <div class="top-bar">
+      <span>
+        <img src="assets/logo.svg" class="logo" alt="logo">
+        <b>Study Buddy</b>
+      </span>
+      <span>
+        <button class="switch-btn" id="switch-btn" title="Switch to Teacher Dashboard">
+          <img src="assets/switch.svg" alt="switch" /> Teacher
+        </button>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+          <img src="assets/theme-toggle.svg" alt="theme" />
+        </button>
+      </span>
+    </div>
+    <h1>Student Dashboard</h1>
+    <form id="student-form">
+      <input type="text" id="topic" placeholder="Enter topic" required />
+      <button type="submit">Get Explanation</button>
+    </form>
+    <div id="output"></div>
+  </main>
+  <script src="theme.js"></script>
+  <script src="switch.js"></script>
+  <script>
+    document.getElementById('student-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const topic = document.getElementById('topic').value;
+      const output = document.getElementById('output');
+      output.innerHTML = "Loading...";
+      try {
+        const res = await fetch('/student/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic })
+        });
+        const data = await res.json();
+        if (data.error) {
+          output.innerHTML = `<b style="color:red">${data.error}</b>`;
+          return;
+        }
+        let html = `<h3>Explanation:</h3><p>${data.explanation}</p><h3>YouTube Links:</h3><ul>`;
+        html += data.youtubeLinks.map(l => `<li><a href="${l.url}" target="_blank">${l.title}</a></li>`).join('');
+        html += '</ul>';
+        output.innerHTML = html;
+      } catch (err) {
+        output.innerHTML = `<b style="color:red">Something went wrong. Please try again.</b>`;
+      }
+    };
+  </script>
+</body>
+</html>

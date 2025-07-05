@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teacher Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <div class="top-bar">
+      <span>
+        <img src="assets/logo.svg" class="logo" alt="logo" />
+        <b>Study Buddy</b>
+      </span>
+      <span>
+        <button class="switch-btn" id="switch-btn" title="Switch to Student Dashboard">
+          <img src="assets/switch.svg" alt="switch" /> Student
+        </button>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+          <img src="assets/theme-toggle.svg" alt="theme" />
+        </button>
+      </span>
+    </div>
+
+    <h1>Teacher Dashboard</h1>
+
+    <form id="teacher-form" enctype="multipart/form-data">
+      <label>Paper Type:
+        <select name="paperType" required>
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+      </label>
+
+      <label>Question Type:
+        <select name="questionType" required>
+          <option value="Subjective">Subjective</option>
+          <option value="Objective">Objective</option>
+        </select>
+      </label>
+
+      <label>Additional Details / Topic:
+        <textarea name="details" placeholder="Enter topic, subject or any specific instructions..." rows="5" required></textarea>
+      </label>
+
+      <button type="submit">Generate PDF</button>
+    </form>
+
+    <div id="output"></div>
+  </main>
+
+  <script src="theme.js"></script>
+  <script src="switch.js"></script>
+  <script>
+    document.getElementById('teacher-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = document.getElementById('teacher-form');
+      const formData = new FormData(form);
+
+      const res = await fetch('/teacher/generate', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.headers.get('content-type').includes('application/pdf')) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'questions.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        document.getElementById('output').innerHTML = '📄 PDF downloaded!';
+      } else {
+        const data = await res.json();
+        document.getElementById('output').innerHTML = data.error || 'Error generating PDF.';
+      }
+    };
+  </script>
+</body>
+</html>

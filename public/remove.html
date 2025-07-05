@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Remove Asterisks TEST</title>
+</head>
+<body>
+  <h1>Test Remove Asterisks</h1>
+  <textarea id="input" rows="10" cols="60">
+Okay * imagine * this * text * **will** be * cleaned *.
+  </textarea>
+  <br />
+  <button id="clean">Clean Text</button>
+  <h3>Cleaned:</h3>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById("clean").onclick = async () => {
+      const text = document.getElementById("input").value;
+      const res = await fetch("/remove-asterisks", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      document.getElementById("output").innerText = data.cleaned;
+    };
+  </script>
+</body>
+</html>
